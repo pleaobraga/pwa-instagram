@@ -5,6 +5,8 @@ if('serviceWorker' in navigator) {
   .register('/service-worker.js')
   .then(() => {
     console.log('Service work is register')
+  }).catch(error => {
+    console.log(error)
   })
 }
 
@@ -14,3 +16,4 @@ window.addEventListener('beforeinstallprompt', function(event) {
   deferedPrompt = event
   return false
 })
+
