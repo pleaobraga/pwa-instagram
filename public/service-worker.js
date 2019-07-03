@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v17";
+var CACHE_STATIC_NAME = "static-v18";
 var CACHE_DYNAMIC_NAME = "dynamic-v2";
 var STATIC_FILES = [
   "/",
@@ -172,3 +172,40 @@ self.addEventListener("fetch", function(event) {
 //     fetch(event.request)
 //   );
 // });
+
+self.addEventListener("sync", event => {
+  if (event.tag === "sync-new-posts") {
+    console.log("[Service worker] Syncing new Posts");
+    event.waitUntil(
+      readAllData("sync-posts").then(data => {
+        for (var dt of data) {
+          fetch(
+            "https://us-central1-pwa-gram-plbraga.cloudfunctions.net/storePostData",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json"
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location,
+                image: "sss"
+              })
+            }
+          )
+            .then(res => {
+              console.log("sent data", res);
+              if (res.ok) {
+                res.json().then(resData => {
+                  deleteItemFromData("sync-posts", resData.id);
+                });
+              }
+            })
+            .catch(err => [console.log("Error while sending data", err)]);
+        }
+      })
+    );
+  }
+});
